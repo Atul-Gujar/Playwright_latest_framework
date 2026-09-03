@@ -1,0 +1,20 @@
+[
+    {
+        "fullName": "Atul",
+        "email": "atul@gmail.com",
+        "currentAddress": "Pune",
+        "permenentAddress": "Satara"
+    },
+    {
+        "fullName": "Sachin",
+        "email": "sachin@gmail.com",
+        "currentAddress": "Pune",
+        "permenentAddress": "Satara"
+    },
+    {
+        "fullName": "Sourabh",
+        "email": "sourabh@gmail.com",
+        "currentAddress": "Pune",
+        "permenentAddress": "Satara"
+    }
+]

@@ -1,0 +1,28 @@
+{
+  "name": "playwright_practice",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:qa": "cross-env ENV=qa playwright test",
+    "test:uat": "cross-env ENV=uat playwright test",
+    "test:prod": "cross-env ENV=prod playwright test",
+    "test:qa:smoke": "cross-env ENV=qa playwright test --grep \"@smoke\"",
+    "test:qa:regression": "cross-env ENV=qa playwright test --grep \"@regression\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@faker-js/faker": "^10.6.0",
+    "@playwright/test": "^1.62.1",
+    "@types/node": "^26.4.1"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "faker": "^6.6.6",
+    "xlsx": "^0.18.5"
+  }
+}
