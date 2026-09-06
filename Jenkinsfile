@@ -188,9 +188,24 @@ pipeline {
              * Requires:
              * Email Extension Plugin
              */
-            emailext(
+           emailext(
     subject: "Jenkins Test - Build #${env.BUILD_NUMBER}",
-    body: "Hello Atul,\n\nThis is a test email from the Jenkins Pipeline.\n\nBuild URL: ${env.BUILD_URL}\n\nRegards,\nJenkins",
+    body: """
+Hello Atul,
+
+This is a test email from the Jenkins Pipeline.
+
+Environment : ${params.ENV}
+Test Suite  : ${params.TEST_SUITE}
+Build       : #${env.BUILD_NUMBER}
+Status      : ${currentBuild.currentResult}
+
+Build URL:
+${env.BUILD_URL}
+
+Regards,
+Jenkins
+""",
     to: 'atulgujar.mae@gmail.com'
 )
         }
