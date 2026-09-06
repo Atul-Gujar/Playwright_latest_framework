@@ -52,13 +52,13 @@ pipeline {
 
                     findstr /B "BASE_URL=" .env.${params.ENV} >nul
                     if errorlevel 1 (
-                        echo ERROR: BASE_URL is missing in .env.${params.ENV}
+                        echo ERROR: BASE_URL is missing
                         exit /b 1
                     )
 
                     findstr /B "API_URL=" .env.${params.ENV} >nul
                     if errorlevel 1 (
-                        echo ERROR: API_URL is missing in .env.${params.ENV}
+                        echo ERROR: API_URL is missing
                         exit /b 1
                     )
 
@@ -116,66 +116,72 @@ pipeline {
                         """
                     }
                 }
-            }    
+            }
         }
 
-         stage('Verify Report') {
-    steps {
-        bat '''
-            echo Checking Playwright report...
+        stage('Verify Playwright Report') {
+            steps {
+                bat '''
+                    echo =========================================
+                    echo Checking Playwright report
+                    echo =========================================
 
-            if exist playwright-report\\index.html (
-                echo =========================================
-                echo Playwright report found!
-                echo =========================================
-                dir playwright-report
-            ) else (
-                echo =========================================
-                echo ERROR: index.html NOT FOUND
-                echo =========================================
-                exit /b 1
-            )
-        '''
-    }
-}
+                    if exist playwright-report\\index.html (
+                        echo SUCCESS: Playwright HTML report found.
+                        echo.
+                        dir playwright-report
+                    ) else (
+                        echo ERROR: playwright-report\\index.html NOT FOUND
+                        exit /b 1
+                    )
+                '''
+            }
+        }
     }
 
     post {
 
-    always {
+        always {
 
-        echo 'Publishing Playwright reports...'
+            echo '========================================='
+            echo 'Publishing Playwright reports...'
+            echo '========================================='
 
-        // Archive the raw Playwright report
-        archiveArtifacts(
-            artifacts: 'playwright-report/**',
-            allowEmptyArchive: true
-        )
+            // Publish HTML report inside Jenkins
+            publishHTML([
+                allowMissing: false,
+                alwaysLinkToLastBuild: true,
+                keepAll: true,
+                reportDir: 'playwright-report',
+                reportFiles: 'index.html',
+                reportName: 'Playwright HTML Report',
+                reportTitles: 'Playwright Test Report'
+            ])
 
-        // Archive test results
-        archiveArtifacts(
-            artifacts: 'test-results/**',
-            allowEmptyArchive: true
-        )
+            // Archive Playwright report files
+            archiveArtifacts(
+                artifacts: 'playwright-report/**',
+                allowEmptyArchive: true
+            )
 
-        // Publish HTML report directly in Jenkins
-        publishHTML([
-            allowMissing: false,
-            alwaysLinkToLastBuild: true,
-            keepAll: true,
-            reportDir: 'playwright-report',
-            reportFiles: 'index.html',
-            reportName: 'Playwright HTML Report',
-            reportTitles: 'Playwright Test Report'
-        ])
+            // Archive screenshots, videos, traces, etc.
+            archiveArtifacts(
+                artifacts: 'test-results/**',
+                allowEmptyArchive: true
+            )
+        }
+
+        success {
+            echo '========================================='
+            echo 'Playwright tests completed successfully.'
+            echo '========================================='
+        }
+
+        failure {
+            echo '========================================='
+            echo 'Playwright tests failed.'
+            echo 'Check Console Output and Playwright HTML Report.'
+            echo '========================================='
+        }
     }
-
-    success {
-        echo 'Playwright tests completed successfully.'
-    }
-
-    failure {
-        echo 'Playwright tests failed.'
-    }
-}
 }
