@@ -2,10 +2,6 @@ pipeline {
 
     agent any
 
-    environment {
-        CI = 'true'
-    }
-
     parameters {
 
         choice(
@@ -21,6 +17,10 @@ pipeline {
         )
     }
 
+    environment {
+        CI = 'true'
+    }
+
     stages {
 
         stage('Show Configuration') {
@@ -34,14 +34,36 @@ pipeline {
 
         stage('Verify Environment File') {
             steps {
-                bat '''
-                    if exist .env.%ENV% (
-                        echo Environment file exists: .env.%ENV%
+                bat """
+                    if exist .env.${params.ENV} (
+                        echo Environment file exists: .env.${params.ENV}
                     ) else (
-                        echo ERROR: Environment file .env.%ENV% does not exist
+                        echo ERROR: Environment file .env.${params.ENV} does not exist
                         exit /b 1
                     )
-                '''
+                """
+            }
+        }
+
+        stage('Verify Environment Variables') {
+            steps {
+                bat """
+                    echo Checking .env.${params.ENV}...
+
+                    findstr /B "BASE_URL=" .env.${params.ENV} >nul
+                    if errorlevel 1 (
+                        echo ERROR: BASE_URL is missing in .env.${params.ENV}
+                        exit /b 1
+                    )
+
+                    findstr /B "API_URL=" .env.${params.ENV} >nul
+                    if errorlevel 1 (
+                        echo ERROR: API_URL is missing in .env.${params.ENV}
+                        exit /b 1
+                    )
+
+                    echo BASE_URL and API_URL are present.
+                """
             }
         }
 
@@ -58,36 +80,40 @@ pipeline {
         }
 
         stage('Run Playwright Tests') {
-
             steps {
-
                 script {
 
-                    switch (params.TEST_SUITE) {
+                    if (params.TEST_SUITE == 'api') {
 
-                        case 'api':
+                        bat """
+                            set "ENV=${params.ENV}"
+                            echo Running API tests on ENV=%ENV%
+                            npx playwright test tests/api
+                        """
 
-                            bat "set ENV=${params.ENV} && npx playwright test tests/api"
+                    } else if (params.TEST_SUITE == 'ui') {
 
-                            break
+                        bat """
+                            set "ENV=${params.ENV}"
+                            echo Running UI tests on ENV=%ENV%
+                            npx playwright test tests/ui
+                        """
 
-                        case 'ui':
+                    } else if (params.TEST_SUITE == 'regression') {
 
-                            bat "set ENV=${params.ENV} && npx playwright test tests/ui"
+                        bat """
+                            set "ENV=${params.ENV}"
+                            echo Running regression tests on ENV=%ENV%
+                            npx playwright test --grep @regression
+                        """
 
-                            break
+                    } else if (params.TEST_SUITE == 'all') {
 
-                        case 'regression':
-
-                            bat "set ENV=${params.ENV} && npx playwright test --grep @regression"
-
-                            break
-
-                        case 'all':
-
-                            bat "set ENV=${params.ENV} && npx playwright test"
-
-                            break
+                        bat """
+                            set "ENV=${params.ENV}"
+                            echo Running all tests on ENV=%ENV%
+                            npx playwright test
+                        """
                     }
                 }
             }
