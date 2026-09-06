@@ -141,57 +141,38 @@ pipeline {
 
     post {
 
-        always {
+    always {
 
-            echo '========================================='
-            echo 'Publishing Playwright reports...'
-            echo '========================================='
+        echo '========================================='
+        echo 'Publishing Playwright reports...'
+        echo '========================================='
 
-            /*
-             * Publish Playwright HTML Report
-             *
-             * Requires:
-             * HTML Publisher Plugin
-             */
-            publishHTML([
-                allowMissing: true,
-                alwaysLinkToLastBuild: true,
-                keepAll: true,
-                reportDir: 'playwright-report',
-                reportFiles: 'index.html',
-                reportName: 'Playwright HTML Report',
-                reportTitles: 'Playwright Test Report'
-            ])
+        publishHTML([
+            allowMissing: true,
+            alwaysLinkToLastBuild: true,
+            keepAll: true,
+            reportDir: 'playwright-report',
+            reportFiles: 'index.html',
+            reportName: 'Playwright HTML Report',
+            reportTitles: 'Playwright Test Report'
+        ])
 
-            /*
-             * Archive Playwright HTML report
-             */
-            archiveArtifacts(
-                artifacts: 'playwright-report/**/*',
-                allowEmptyArchive: true,
-                fingerprint: true
-            )
+        archiveArtifacts(
+            artifacts: 'playwright-report/**/*',
+            allowEmptyArchive: true,
+            fingerprint: true
+        )
 
-            /*
-             * Archive screenshots, videos, traces,
-             * error-context files, etc.
-             */
-            archiveArtifacts(
-                artifacts: 'test-results/**/*',
-                allowEmptyArchive: true,
-                fingerprint: true
-            )
+        archiveArtifacts(
+            artifacts: 'test-results/**/*',
+            allowEmptyArchive: true,
+            fingerprint: true
+        )
 
-            /*
-             * Send email notification
-             *
-             * Requires:
-             * Email Extension Plugin
-             */
-           mail(
-    to: 'atulgujar.mae@gmail.com',
-    subject: "Playwright ${currentBuild.currentResult} - ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-    body: """
+        mail(
+            to: 'atulgujar.mae@gmail.com',
+            subject: "Playwright ${currentBuild.currentResult} - ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+            body: """
 Hello Team,
 
 Playwright automation execution has completed.
@@ -224,41 +205,26 @@ REPORT
 Playwright HTML Report:
 ${env.BUILD_URL}Playwright_20HTML_20Report/
 
-You can also open the Jenkins build page and click:
-
-"Playwright HTML Report"
-
-========================================
-
 Regards,
 Jenkins Automation
 """
-)
-        }
-
-        success {
-
-            echo '========================================='
-            echo 'Playwright tests completed successfully.'
-            echo 'Email notification sent.'
-            echo '========================================='
-        }
-
-        failure {
-
-            echo '========================================='
-            echo 'Playwright tests failed.'
-            echo 'Report has been archived/published.'
-            echo 'Failure notification email sent.'
-            echo '========================================='
-        }
-
-        unstable {
-
-            echo '========================================='
-            echo 'Playwright build is UNSTABLE.'
-            echo 'Email notification sent.'
-            echo '========================================='
-        }
+        )
     }
+
+    success {
+        echo 'Playwright tests completed successfully.'
+        echo 'Email notification sent.'
+    }
+
+    failure {
+        echo 'Playwright tests failed.'
+        echo 'Report has been published.'
+        echo 'Failure notification sent.'
+    }
+
+    unstable {
+        echo 'Playwright build is UNSTABLE.'
+        echo 'Email notification sent.'
+    }
+}
 }
