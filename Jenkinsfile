@@ -23,18 +23,25 @@ pipeline {
 
     stages {
 
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
-
         stage('Show Configuration') {
             steps {
                 echo "================================="
                 echo "Environment : ${params.ENV}"
                 echo "Test Suite  : ${params.TEST_SUITE}"
                 echo "================================="
+            }
+        }
+
+        stage('Verify Environment File') {
+            steps {
+                bat '''
+                    if exist .env.%ENV% (
+                        echo Environment file exists: .env.%ENV%
+                    ) else (
+                        echo ERROR: Environment file .env.%ENV% does not exist
+                        exit /b 1
+                    )
+                '''
             }
         }
 
@@ -81,7 +88,6 @@ pipeline {
                             bat "set ENV=${params.ENV} && npx playwright test"
 
                             break
-
                     }
                 }
             }
