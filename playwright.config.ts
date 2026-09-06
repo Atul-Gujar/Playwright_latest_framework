@@ -42,7 +42,7 @@ export default defineConfig({
 
     video: 'retain-on-failure',
 
-    headless: false
+    headless: true
   },
 
   /* Configure projects for major browsers */
