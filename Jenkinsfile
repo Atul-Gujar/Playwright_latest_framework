@@ -189,53 +189,28 @@ pipeline {
              * Email Extension Plugin
              */
             emailext(
-                subject: "Playwright ${currentBuild.currentResult} - ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-
-                body: """
-Hello Team,
+    subject: "Playwright ${currentBuild.currentResult} - ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+    body: """
+Hello Atul,
 
 Playwright automation execution has completed.
 
-========================================
-EXECUTION DETAILS
-========================================
-
 Environment : ${params.ENV}
 Test Suite  : ${params.TEST_SUITE}
+Build Number: ${env.BUILD_NUMBER}
+Build Status: ${currentBuild.currentResult}
 
-Build Number : ${env.BUILD_NUMBER}
-
-Build Status : ${currentBuild.currentResult}
-
-========================================
-JENKINS DETAILS
-========================================
-
-Job Name:
-${env.JOB_NAME}
-
-Build URL:
+Jenkins Build URL:
 ${env.BUILD_URL}
 
-========================================
-REPORT
-========================================
-
-Playwright HTML Report:
+Playwright Report:
 ${env.BUILD_URL}Playwright_20HTML_20Report/
-
-You can also open the Jenkins build page and click:
-
-"Playwright HTML Report"
-
-========================================
 
 Regards,
 Jenkins Automation
 """,
-
-                to: 'atulgujar.mae@gmail.com'
-            )
+    to: 'atulgujar.mae@gmail.com'
+)
         }
 
         success {
