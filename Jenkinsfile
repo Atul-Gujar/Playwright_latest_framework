@@ -116,28 +116,51 @@ pipeline {
                         """
                     }
                 }
-            }
+            }    
         }
+
+         stage('Verify Report') {
+    steps {
+        bat '''
+            echo Checking Playwright report...
+
+            if exist playwright-report\\index.html (
+                echo =========================================
+                echo Playwright report found!
+                echo =========================================
+                dir playwright-report
+            ) else (
+                echo =========================================
+                echo ERROR: index.html NOT FOUND
+                echo =========================================
+                exit /b 1
+            )
+        '''
+    }
+}
     }
 
     post {
 
     always {
 
-        echo 'Publishing Playwright artifacts...'
+        echo 'Publishing Playwright reports...'
 
+        // Archive the raw Playwright report
         archiveArtifacts(
             artifacts: 'playwright-report/**',
             allowEmptyArchive: true
         )
 
+        // Archive test results
         archiveArtifacts(
             artifacts: 'test-results/**',
             allowEmptyArchive: true
         )
 
+        // Publish HTML report directly in Jenkins
         publishHTML([
-            allowMissing: true,
+            allowMissing: false,
             alwaysLinkToLastBuild: true,
             keepAll: true,
             reportDir: 'playwright-report',
