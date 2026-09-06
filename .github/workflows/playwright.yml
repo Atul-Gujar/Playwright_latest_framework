@@ -4,15 +4,16 @@ on:
   push:
     branches:
       - main
-  
+
   pull_request:
     branches:
       - main
 
   workflow_dispatch:
     inputs:
+
       environment:
-        description: Select test environment
+        description: "Select test environment"
         required: true
         type: choice
         options:
@@ -21,49 +22,116 @@ on:
           - prod
         default: qa
 
+      test_suite:
+        description: "Select test suite"
+        required: true
+        type: choice
+        options:
+          - api
+          - ui
+          - regression
+          - all
+        default: regression
+
 jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+
     environment:
       name: ${{ inputs.environment || 'qa' }}
 
     steps:
+
+      # --------------------------------------------------
+      # 1. Checkout repository
+      # --------------------------------------------------
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # --------------------------------------------------
+      # 2. Setup Node.js
+      # --------------------------------------------------
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
 
+      # --------------------------------------------------
+      # 3. Install dependencies
+      # --------------------------------------------------
       - name: Install dependencies
         run: npm ci
 
+      # --------------------------------------------------
+      # 4. Install Playwright browsers
+      # --------------------------------------------------
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
-      - name: Show selected environment
-        run: echo "Environment = ${{ inputs.environment || 'qa' }}"
+      # --------------------------------------------------
+      # 5. Display selected configuration
+      # --------------------------------------------------
+      - name: Show test configuration
+        run: |
+          echo "Environment = ${{ inputs.environment || 'qa' }}"
+          echo "Test Suite  = ${{ inputs.test_suite || 'all' }}"
 
-      - name: Run Playwright tests
+      # --------------------------------------------------
+      # 6. Run API tests
+      # --------------------------------------------------
+      - name: Run API tests
+        if: ${{ (inputs.test_suite || 'all') == 'api' }}
+        run: npx playwright test tests/api
+        env:
+          ENV: ${{ inputs.environment || 'qa' }}
+
+      # --------------------------------------------------
+      # 7. Run UI tests
+      # --------------------------------------------------
+      - name: Run UI tests
+        if: ${{ (inputs.test_suite || 'all') == 'ui' }}
+        run: npx playwright test tests/ui
+        env:
+          ENV: ${{ inputs.environment || 'qa' }}
+
+      # --------------------------------------------------
+      # 8. Run Regression tests
+      # --------------------------------------------------
+      - name: Run Regression tests
+        if: ${{ (inputs.test_suite || 'all') == 'regression' }}
+        run: npx playwright test --grep "@regression"
+        env:
+          ENV: ${{ inputs.environment || 'qa' }}
+
+      # --------------------------------------------------
+      # 9. Run All tests
+      # --------------------------------------------------
+      - name: Run All tests
+        if: ${{ (inputs.test_suite || 'all') == 'all' }}
         run: npx playwright test
         env:
           ENV: ${{ inputs.environment || 'qa' }}
 
+      # --------------------------------------------------
+      # 10. Upload Playwright HTML report
+      # --------------------------------------------------
       - name: Upload Playwright report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
+          name: playwright-report-${{ inputs.environment || 'qa' }}-${{ inputs.test_suite || 'all' }}
           path: playwright-report/
           retention-days: 30
 
+      # --------------------------------------------------
+      # 11. Upload test results
+      # --------------------------------------------------
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results
+          name: test-results-${{ inputs.environment || 'qa' }}-${{ inputs.test_suite || 'all' }}
           path: test-results/
           retention-days: 30

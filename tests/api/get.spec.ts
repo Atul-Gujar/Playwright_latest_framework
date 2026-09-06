@@ -1,21 +1,15 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../../fixtures/api.fixture';
 
-test('GET - Get user details', async ({ request }) => {
+test('GET - Get user details', async ({ api }) => {
 
-    const response = await request.get(
-        'https://jsonplaceholder.typicode.com/users/1'
-    );
+    const response = await api.get('/users/1');
 
-    // 1. Verify status code
     expect(response.status()).toBe(200);
 
-    // 2. Convert response to JSON
     const responseBody = await response.json();
 
-    // 3. Print response
     console.log(responseBody);
 
-    // 4. Validate response data
     expect(responseBody.id).toBe(1);
     expect(responseBody.name).toBeTruthy();
     expect(responseBody.email).toBeTruthy();
