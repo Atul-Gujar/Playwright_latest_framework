@@ -122,27 +122,37 @@ pipeline {
 
     post {
 
-        always {
+    always {
 
-            echo 'Publishing Playwright artifacts...'
+        echo 'Publishing Playwright artifacts...'
 
-            archiveArtifacts(
-                artifacts: 'playwright-report/**',
-                allowEmptyArchive: true
-            )
+        archiveArtifacts(
+            artifacts: 'playwright-report/**',
+            allowEmptyArchive: true
+        )
 
-            archiveArtifacts(
-                artifacts: 'test-results/**',
-                allowEmptyArchive: true
-            )
-        }
+        archiveArtifacts(
+            artifacts: 'test-results/**',
+            allowEmptyArchive: true
+        )
 
-        success {
-            echo 'Playwright tests completed successfully.'
-        }
-
-        failure {
-            echo 'Playwright tests failed.'
-        }
+        publishHTML([
+            allowMissing: true,
+            alwaysLinkToLastBuild: true,
+            keepAll: true,
+            reportDir: 'playwright-report',
+            reportFiles: 'index.html',
+            reportName: 'Playwright HTML Report',
+            reportTitles: 'Playwright Test Report'
+        ])
     }
+
+    success {
+        echo 'Playwright tests completed successfully.'
+    }
+
+    failure {
+        echo 'Playwright tests failed.'
+    }
+}
 }
