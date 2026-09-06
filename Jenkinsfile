@@ -189,26 +189,8 @@ pipeline {
              * Email Extension Plugin
              */
             emailext(
-    subject: "Playwright ${currentBuild.currentResult} - ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-    body: """
-Hello Atul,
-
-Playwright automation execution has completed.
-
-Environment : ${params.ENV}
-Test Suite  : ${params.TEST_SUITE}
-Build Number: ${env.BUILD_NUMBER}
-Build Status: ${currentBuild.currentResult}
-
-Jenkins Build URL:
-${env.BUILD_URL}
-
-Playwright Report:
-${env.BUILD_URL}Playwright_20HTML_20Report/
-
-Regards,
-Jenkins Automation
-""",
+    subject: "Jenkins Test - Build #${env.BUILD_NUMBER}",
+    body: "Hello Atul,\n\nThis is a test email from the Jenkins Pipeline.\n\nBuild URL: ${env.BUILD_URL}\n\nRegards,\nJenkins",
     to: 'atulgujar.mae@gmail.com'
 )
         }
